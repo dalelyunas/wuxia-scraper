@@ -1,0 +1,11 @@
+{
+  "base_url": "http://www.wuxiaworld.com/{}-index/{}-chapter-{}",
+  "delay": 1.2,
+  "books": [
+    {
+      "url": "ast",
+      "title": "Ancient Strengthening Technique",
+      "latest": 1
+    }
+  ]
+}
