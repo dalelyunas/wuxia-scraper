@@ -1,4 +1,5 @@
 *.pdf
 .DS_Store
-wuxia-scraper/
+wuxia-scraper/*
 *.pkl
+pdfs/*

@@ -1,11 +1,13 @@
 {
-  "base_url": "http://www.wuxiaworld.com/{}-index/{}-chapter-{}",
-  "delay": 1.2,
-  "books": [
-    {
-      "url": "ast",
-      "title": "Ancient Strengthening Technique",
-      "latest": 1
-    }
-  ]
+    "delay": 1.2,
+    "base_url": "http://www.wuxiaworld.com/{}-index/{}-chapter-{}",
+    "books": [
+        {
+            "chapter": "sr",
+            "title": "Spirit Realm",
+            "latest": 327,
+            "index": "sr",
+            "preview": false
+        }
+    ]
 }

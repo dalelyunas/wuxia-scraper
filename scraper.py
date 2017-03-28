@@ -14,14 +14,18 @@ FPDF_FONTPATH = ''
 def scrape(book, pdf):
     latest = book['latest']
     ended = False
+    prev_chapter = []
     while(not ended):
-        soup = get_chapter(book['url'], latest)
+        soup = get_chapter(book, latest)
         if is_valid_chapter(soup):
-            chapter = process_chapter(soup, latest)
-            build_pdf_page(pdf, chapter[0], chapter[1])
+            if (len(prev_chapter) > 0):
+                build_pdf_page(pdf, prev_chapter[0], prev_chapter[1:])
+            prev_chapter = process_chapter(soup, latest)
             latest += 1
         else:
             book['latest'] = latest - 1
+            if (not book['preview']):
+                build_pdf_page(pdf, prev_chapter[0], prev_chapter[1:])
             ended = True
 
         time.sleep(config['delay'])
@@ -34,6 +38,7 @@ def process_chapter(soup, number):
     title = title if header_title is None else header_title.text.strip()
     body_title = soup.find_next("strong")
     title = title if body_title is None else body_title.text.strip()
+    strings.append(title)
 
     start = soup.find('div', {'itemprop': 'articleBody'}).find_next('hr')
     nested = start.find_all('p')
@@ -41,12 +46,13 @@ def process_chapter(soup, number):
     for p in text:
         if p.name == 'hr':
             break
-        elif 'Previous Chapter' in p.text and 'Next Chapter' in p.text:
+        p_text = unidecode(str(p.text))
+        if 'Previous Chapter' in p_text and 'Next Chapter' in p_text:
             break
         elif p.name == 'p':
-            strings.append(unidecode(str(p.text)))
+            strings.append(p_text)
 
-    return (title, strings)
+    return strings
 
 
 def is_valid_chapter(soup):
@@ -54,14 +60,15 @@ def is_valid_chapter(soup):
         return False
 
     start = soup.find('div', {'class': 'entry-content'}).find_next('hr')
-    if start.find_next('img') is not None:
+    if start.find_next('img', {'class': 'size-full'}) is not None:
         return False
 
     return True
 
 
-def get_chapter(book, chapter):
-    page = requests.get(config['base_url'].format(book, book, chapter))
+def get_chapter(book, number):
+    page = requests.get(config['base_url'].format(book['index'],
+                                                  book['chapter'], number))
     page.encoding = 'utf-8'
     soup = BeautifulSoup(page.text, 'html.parser')
     return soup
@@ -75,7 +82,7 @@ def build_pdf_page(pdf, title, text):
     pdf.ln(15)
     pdf.set_font('EBGaramond', '', 12)
     for p in text:
-        pdf.multi_cell(width, 15, p)
+        pdf.multi_cell(width, 15, p, align='L')
         pdf.ln(15)
 
 
@@ -83,9 +90,9 @@ def main():
     pdf = FPDF(format='letter', unit='pt')
     pdf.add_font('EBGaramond', '', 'EBGaramondRegular.ttf', uni=True)
     pdf.set_margins(144, 72, 144)
-    chapter = process_chapter(get_chapter('renegade', 397), 397)
-    build_pdf_page(pdf, chapter[0], chapter[1])
-    pdf.output('{}.pdf'.format('ast'))
+    scrape(config['books'][0], pdf)
+    pdf.output('pdfs/{}.pdf'.format(config['books'][0]['index']))
+    json.dump(config, open('config.json', 'w'), indent=4)
 
 
 if __name__ == "__main__":
