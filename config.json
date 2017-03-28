@@ -1,13 +1,13 @@
 {
-    "delay": 1.2,
-    "base_url": "http://www.wuxiaworld.com/{}-index/{}-chapter-{}",
     "books": [
         {
-            "chapter": "sr",
-            "title": "Spirit Realm",
-            "latest": 327,
             "index": "sr",
-            "preview": false
+            "chapter": "sr",
+            "preview": false,
+            "latest": 328,
+            "title": "Spirit Realm"
         }
-    ]
+    ],
+    "base_url": "http://www.wuxiaworld.com/{}-index/{}-chapter-{}",
+    "delay": 1.2
 }

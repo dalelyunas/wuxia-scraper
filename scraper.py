@@ -11,34 +11,39 @@ config = json.load(open('config.json'))
 FPDF_FONTPATH = ''
 
 
-def scrape(book, pdf):
+def scrape(book, data):
     latest = book['latest']
     ended = False
-    prev_chapter = []
+    prev_chapter = {'content': []}
     while(not ended):
         soup = get_chapter(book, latest)
         if is_valid_chapter(soup):
-            if (len(prev_chapter) > 0):
-                build_pdf_page(pdf, prev_chapter[0], prev_chapter[1:])
+            if (len(prev_chapter['content']) > 0):
+                data['chapters'].append(prev_chapter)
+
             prev_chapter = process_chapter(soup, latest)
             latest += 1
         else:
+            if (not book['preview'] and len(prev_chapter['content']) > 0):
+                data['chapters'].append(prev_chapter)
+                latest += 1
+
             book['latest'] = latest - 1
-            if (not book['preview']):
-                build_pdf_page(pdf, prev_chapter[0], prev_chapter[1:])
             ended = True
 
         time.sleep(config['delay'])
 
 
 def process_chapter(soup, number):
-    strings = []
+    chapter = {}
+    chapter['content'] = []
+
     title = 'Chapter {}'.format(number)
     header_title = soup.find('h1', {'class': 'entry-title'})
     title = title if header_title is None else header_title.text.strip()
     body_title = soup.find_next("strong")
     title = title if body_title is None else body_title.text.strip()
-    strings.append(title)
+    chapter['title'] = unidecode(title)
 
     start = soup.find('div', {'itemprop': 'articleBody'}).find_next('hr')
     nested = start.find_all('p')
@@ -50,9 +55,9 @@ def process_chapter(soup, number):
         if 'Previous Chapter' in p_text and 'Next Chapter' in p_text:
             break
         elif p.name == 'p':
-            strings.append(p_text)
+            chapter['content'].append(p_text)
 
-    return strings
+    return chapter
 
 
 def is_valid_chapter(soup):
@@ -75,6 +80,9 @@ def get_chapter(book, number):
 
 
 def build_pdf_page(pdf, title, text):
+    pdf = FPDF(format='letter', unit='pt')
+    pdf.add_font('EBGaramond', '', 'EBGaramondRegular.ttf', uni=True)
+    pdf.set_margins(144, 72, 144)
     pdf.add_page()
     width = pdf.w - 2 * pdf.l_margin
     pdf.set_font('EBGaramond', '', 20)
@@ -85,13 +93,18 @@ def build_pdf_page(pdf, title, text):
         pdf.multi_cell(width, 15, p, align='L')
         pdf.ln(15)
 
+    pdf.output('pdfs/{}.pdf'.format(config['books'][0]['index']))
+
 
 def main():
-    pdf = FPDF(format='letter', unit='pt')
-    pdf.add_font('EBGaramond', '', 'EBGaramondRegular.ttf', uni=True)
-    pdf.set_margins(144, 72, 144)
-    scrape(config['books'][0], pdf)
-    pdf.output('pdfs/{}.pdf'.format(config['books'][0]['index']))
+    '''Check for existing file'''
+    data = {}
+    data['title'] = config['books'][0]['title']
+    data['chapters'] = []
+    sr = config['books'][0]
+
+    scrape(sr, data)
+    json.dump(data, open('books/{}.json'.format(sr['index']), 'w'), indent=4)
     json.dump(config, open('config.json', 'w'), indent=4)
 
 
