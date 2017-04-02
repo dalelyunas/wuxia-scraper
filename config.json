@@ -1,13 +1,18 @@
 {
     "delay": 1.2,
-    "base_url": "http://www.wuxiaworld.com/{}-index/{}-chapter-{}",
     "books": [
         {
-            "index": "sr",
+            "title": "Spirit Realm",
+            "latest": 330,
             "chapter": "sr",
-            "latest": 328,
-            "preview": false,
-            "title": "Spirit Realm"
+            "index": "sr"
+        },
+        {
+            "title": "Emperor of Solo Play",
+            "latest": 98,
+            "chapter": "esp",
+            "index": "emperorofsoloplay"
         }
-    ]
+    ],
+    "base_url": "http://www.wuxiaworld.com/{}-index/{}-chapter-{}"
 }
