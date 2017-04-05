@@ -4,3 +4,4 @@ wuxia-scraper/*
 *.pkl
 pdfs/*
 books/*
+*.json

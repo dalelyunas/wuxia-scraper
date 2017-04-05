@@ -66,7 +66,8 @@ def is_valid_chapter(soup):
 
     start = soup.find('div', {'class': 'entry-content'}).find_next('hr')
 
-    if start is not None and start.find_next('img', {'class': 'size-full'}) is not None:
+    if start is not None and \
+            start.find_next('img', {'class': 'size-full'}) is not None:
         return False
 
     return True
@@ -115,7 +116,7 @@ def process_book(book):
     build_pdf(data)
 
 
-def main():
+def execute():
     for book in config['books']:
         print('processing: {}'.format(book['title']))
         process_book(book)
@@ -123,4 +124,4 @@ def main():
     json.dump(config, open('config.json', 'w'), indent=4)
 
 if __name__ == "__main__":
-    main()
+    execute()
