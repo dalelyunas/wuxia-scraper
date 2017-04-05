@@ -116,10 +116,11 @@ def process_book(book):
 
 
 def main():
-    build_pdf(json.load(open('books/emperorofsoloplay.json')))
-    '''process_book(config['books'][1])
-    json.dump(config, open('config.json', 'w'), indent=4)'''
+    for book in config['books']:
+        print('processing: {}'.format(book['title']))
+        process_book(book)
 
+    json.dump(config, open('config.json', 'w'), indent=4)
 
 if __name__ == "__main__":
     main()
