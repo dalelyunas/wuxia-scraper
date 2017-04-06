@@ -4,12 +4,10 @@ import json
 from bs4 import BeautifulSoup
 import requests
 import time
-from fpdf import FPDF
 from unidecode import unidecode
 import os
 
-config = json.load(open('config.json'))
-FPDF_FONTPATH = ''
+config = json.load(open('../config.json'))
 
 
 def scrape(book_config, data):
@@ -81,29 +79,8 @@ def get_chapter(book_config, number):
     return soup
 
 
-def build_pdf(book_data):
-    pdf = FPDF(format='letter', unit='pt')
-    pdf.add_font('EBGaramond', '', 'EBGaramondRegular.ttf', uni=True)
-    pdf.set_margins(144, 72, 144)
-
-    for chapter in book_data['chapters']:
-        pdf.add_page()
-
-        width = pdf.w - 2 * pdf.l_margin
-        pdf.set_font('EBGaramond', '', 20)
-        pdf.multi_cell(width, 15, chapter['title'])
-        pdf.ln(15)
-        pdf.set_font('EBGaramond', '', 12)
-
-        for p in chapter['content']:
-            pdf.multi_cell(width, 15, p, align='L')
-            pdf.ln(15)
-
-    pdf.output('pdfs/{}.pdf'.format(book_data['title']))
-
-
 def process_book(book):
-    json_path = 'books/{}.json'.format(book['index'])
+    json_path = '../var/books/{}.json'.format(book['index'])
     if os.path.isfile(json_path):
         data = json.load(open(json_path))
     else:
@@ -113,15 +90,15 @@ def process_book(book):
 
     scrape(book, data)
     json.dump(data, open(json_path, 'w'), indent=4)
-    build_pdf(data)
 
 
 def execute():
     for book in config['books']:
         print('processing: {}'.format(book['title']))
         process_book(book)
+        time.sleep(config['delay'])
 
-    json.dump(config, open('config.json', 'w'), indent=4)
+    json.dump(config, open('../config.json', 'w'), indent=4)
 
 if __name__ == "__main__":
     execute()
