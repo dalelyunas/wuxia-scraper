@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import json
 from bs4 import BeautifulSoup
 import requests
@@ -64,9 +62,12 @@ def is_valid_chapter(soup):
 
     start = soup.find('div', {'class': 'entry-content'}).find_next('hr')
 
-    if start is not None and \
-            start.find_next('img', {'class': 'size-full'}) is not None:
-        return False
+    if start is not None:
+        if start.find_next('img', {'class': 'size-full'}) is not None:
+            return False
+
+        if start.find_next('iframe') is not None:
+            return False
 
     return True
 
@@ -92,13 +93,10 @@ def process_book(book):
     json.dump(data, open(json_path, 'w'), indent=4)
 
 
-def execute():
+def scrape_all_books():
     for book in config['books']:
-        print('processing: {}'.format(book['title']))
+        print('Scraping: {}'.format(book['title']))
         process_book(book)
         time.sleep(config['delay'])
 
     json.dump(config, open('../config.json', 'w'), indent=4)
-
-if __name__ == "__main__":
-    execute()

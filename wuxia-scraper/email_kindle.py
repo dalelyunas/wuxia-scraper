@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import os
 import smtplib
 import json
@@ -10,7 +8,7 @@ from email.mime.application import MIMEApplication
 config = json.load(open('../config.json'))
 
 
-def send_email(book_title):
+def send_email(filename):
     email_username = config['send_email']
     email_password = config['send_password']
     kindle_email = config['kindle_email']
@@ -20,12 +18,12 @@ def send_email(book_title):
     email['To'] = kindle_email
     email['From'] = email_username
 
-    pdf = open('../var/pdfs/{}.pdf'.format(book_title), "rb")
+    pdf = open('../var/pdfs/{}'.format(filename), "rb")
 
     attachment = MIMEApplication(pdf.read(), _subtype='pdf')
     encoders.encode_base64(attachment)
     attachment.add_header('Content-Disposition',
-                          'attachment', filename=book_title + '.pdf')
+                          'attachment', filename=filename)
 
     email.attach(attachment)
 
@@ -37,5 +35,9 @@ def send_email(book_title):
     server.sendmail(email_username, kindle_email, email.as_string())
     server.close()
 
-if __name__ == "__main__":
-    send_email('Spirit Realm')
+
+def send_all_books():
+    for pdf in os.listdir('../var/pdfs'):
+        if pdf.endswith('.pdf'):
+            print('Sending: {}'.format(pdf))
+            send_email(pdf)
