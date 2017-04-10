@@ -1,11 +1,14 @@
 from fpdf import FPDF
 import json
 import os
+from threading import Thread
 
 FPDF_FONTPATH = '../fonts'
 
 
-def build_pdf(book_data):
+def build_pdf(book_path):
+    book_data = json.load(open('../var/books/{}'.format(book_path)))
+    print('Converting: {}'.format(book_data['title']))
     pdf = FPDF(format='letter', unit='pt')
     pdf.add_font('EBGaramond', '', '../fonts/EBGaramondRegular.ttf', uni=True)
     pdf.set_margins(144, 72, 144)
@@ -27,7 +30,13 @@ def build_pdf(book_data):
 
 
 def convert_all_books():
+    threads = []
     for book in os.listdir('../var/books'):
         if book.endswith('.json'):
-            print('Converting: {}'.format(book))
-            build_pdf(json.load(open('../var/books/{}'.format(book))))
+            threads.append(Thread(target=build_pdf, args=(book,)))
+
+    for t in threads:
+        t.start()
+
+    for t in threads:
+        t.join()

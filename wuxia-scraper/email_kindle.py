@@ -4,11 +4,13 @@ import json
 from email import encoders
 from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
+from threading import Thread
 
 config = json.load(open('../config.json'))
 
 
 def send_email(filename):
+    print('Sending: {}'.format(filename))
     email_username = config['send_email']
     email_password = config['send_password']
     kindle_email = config['kindle_email']
@@ -37,7 +39,13 @@ def send_email(filename):
 
 
 def send_all_books():
+    threads = []
     for pdf in os.listdir('../var/pdfs'):
         if pdf.endswith('.pdf'):
-            print('Sending: {}'.format(pdf))
-            send_email(pdf)
+            threads.append(Thread(target=send_email, args=(pdf,)))
+
+    for t in threads:
+        t.start()
+
+    for t in threads:
+        t.join()
