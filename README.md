@@ -1,12 +1,13 @@
 wuxia-scraper
 ===========
 
-A basic python scraper used for wuxiaworld.com to generate pdfs from stories. 
+A python scraper used for wuxiaworld.com to generate pdfs from stories. The pdfs are formatted and use the EB Garamond font. The pdfs can also be emailed directly to a kindle where they get converted to the kindle format.
 
-The scraping functionality currently works on books that:
-* use urls formatted like /{book_index}-index/{book_chapter}-chapter-{number}/ 
-* use a single \<hr> tag before the main text of each chapter
+The scraper currently works on books that meet these conditions:
+* the url is in the format: /**{book_index}**-index/**{book_chapter}**-chapter-**{number}**/ 
+* the chapters have a single horizontal line before the main text
 
-The scraper can optionally send the generated pdfs to a kindle through email where it gets converted to the kindle format
+
+
 
 
