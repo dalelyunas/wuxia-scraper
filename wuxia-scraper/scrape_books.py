@@ -15,6 +15,7 @@ def scrape(book_config, data):
         del chapters[len(chapters) - 1]
     ended = False
     while(not ended):
+        print("Scraping chapter: " + str(latest))
         soup = get_chapter(book_config, latest)
         if is_valid_chapter(soup):
             chapters.append(process_chapter(soup, latest))
@@ -37,19 +38,17 @@ def process_chapter(soup, number):
     title = title if body_title is None else body_title.text.strip()
     chapter['title'] = unidecode(title)
 
-    article = soup.find('div', {'itemprop': 'articleBody'})
-
-    start = article.find_next('hr')
-    start = article.find_all('p')[1] if start is None else start
-
-    nested = start.find_all('p')
-    text = nested if nested else start.find_next_siblings()
-    for p in text:
+    paragraphs = soup.findAll('p')
+    first_links = True
+    for p in paragraphs:
         if p.name == 'hr':
             break
         p_text = unidecode(str(p.text))
         if 'Previous Chapter' in p_text and 'Next Chapter' in p_text:
-            break
+            if not first_links:
+                break
+            else:
+                first_links = False
         elif p.name == 'p':
             chapter['content'].append(p_text)
 
